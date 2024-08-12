@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -31,9 +32,7 @@ class PlutoColumnTitleState extends PlutoStateWithChange<PlutoColumnTitle> {
   PlutoColumnSort _sort = PlutoColumnSort.none;
 
   bool get showContextIcon {
-    return widget.column.enableContextMenu ||
-        widget.column.enableDropToResize ||
-        !_sort.isNone;
+    return widget.column.enableContextMenu || widget.column.enableDropToResize || !_sort.isNone;
   }
 
   bool get enableGesture {
@@ -98,8 +97,7 @@ class PlutoColumnTitleState extends PlutoStateWithChange<PlutoColumnTitle> {
 
   void _handleOnPointMove(PointerMoveEvent event) {
     // if at least one movement event has distanceSquared > 0.5 _isPointMoving will be true
-    _isPointMoving |=
-        (_columnRightPosition - event.position).distanceSquared > 0.5;
+    _isPointMoving |= (_columnRightPosition - event.position).distanceSquared > 0.5;
 
     if (!_isPointMoving) return;
 
@@ -144,9 +142,8 @@ class PlutoColumnTitleState extends PlutoStateWithChange<PlutoColumnTitle> {
           icon: PlutoGridColumnIcon(
             sort: _sort,
             color: style.iconColor,
-            icon: widget.column.enableContextMenu
-                ? style.columnContextIcon
-                : style.columnResizeIcon,
+            icon:
+                widget.column.enableContextMenu ? style.columnContextIcon : style.columnResizeIcon,
             ascendingIcon: style.columnAscendingIcon,
             descendingIcon: style.columnDescendingIcon,
           ),
@@ -278,11 +275,10 @@ class _DraggableWidget extends StatelessWidget {
             alignment: column.titleTextAlign.alignmentValue,
             width: PlutoGridSettings.minColumnWidth,
             height: stateManager.columnHeight,
-            backgroundColor:
-                stateManager.configuration.style.gridBackgroundColor,
+            backgroundColor: stateManager.configuration.style.gridBackgroundColor,
             borderColor: stateManager.configuration.style.gridBorderColor,
             child: Text(
-              column.title,
+              'cauko som tu' ?? column.title,
               style: stateManager.configuration.style.columnTextStyle.copyWith(
                 fontSize: 12,
               ),
@@ -344,12 +340,10 @@ class _ColumnWidget extends StatelessWidget {
   });
 
   EdgeInsets get padding =>
-      column.titlePadding ??
-      stateManager.configuration.style.defaultColumnTitlePadding;
+      column.titlePadding ?? stateManager.configuration.style.defaultColumnTitlePadding;
 
   bool get showSizedBoxForIcon =>
-      column.isShowRightIcon &&
-      (column.titleTextAlign.isRight || stateManager.isRTL);
+      column.isShowRightIcon && (column.titleTextAlign.isRight || stateManager.isRTL);
 
   @override
   Widget build(BuildContext context) {
@@ -363,8 +357,7 @@ class _ColumnWidget extends StatelessWidget {
       },
       onAcceptWithDetails: (columnToMove) {
         if (columnToMove.data.key != column.key) {
-          stateManager.moveColumn(
-              column: columnToMove.data, targetColumn: column);
+          stateManager.moveColumn(column: columnToMove.data, targetColumn: column);
         }
       },
       builder: (dragContext, candidate, rejected) {
@@ -377,9 +370,7 @@ class _ColumnWidget extends StatelessWidget {
           height: height,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: noDragTarget
-                  ? column.backgroundColor
-                  : style.dragTargetColumnColor,
+              color: noDragTarget ? column.backgroundColor : style.dragTargetColumnColor,
               border: BorderDirectional(
                 end: style.enableColumnBorderVertical
                     ? BorderSide(color: style.borderColor, width: 1.0)
@@ -419,12 +410,10 @@ class CheckboxAllSelectionWidget extends PlutoStatefulWidget {
   const CheckboxAllSelectionWidget({required this.stateManager, super.key});
 
   @override
-  CheckboxAllSelectionWidgetState createState() =>
-      CheckboxAllSelectionWidgetState();
+  CheckboxAllSelectionWidgetState createState() => CheckboxAllSelectionWidgetState();
 }
 
-class CheckboxAllSelectionWidgetState
-    extends PlutoStateWithChange<CheckboxAllSelectionWidget> {
+class CheckboxAllSelectionWidgetState extends PlutoStateWithChange<CheckboxAllSelectionWidget> {
   bool? _checked;
 
   @override
@@ -499,7 +488,7 @@ class _ColumnTextWidget extends PlutoStatefulWidget {
 }
 
 class _ColumnTextWidgetState extends PlutoStateWithChange<_ColumnTextWidget> {
-  bool _isFilteredList = false;
+  bool _hasPopupFilter = false;
 
   @override
   PlutoGridStateManager get stateManager => widget.stateManager;
@@ -513,54 +502,82 @@ class _ColumnTextWidgetState extends PlutoStateWithChange<_ColumnTextWidget> {
 
   @override
   void updateState(PlutoNotifierEvent event) {
-    _isFilteredList = update<bool>(
-      _isFilteredList,
+    _hasPopupFilter = update<bool>(
+      _hasPopupFilter,
       stateManager.isFilteredColumn(widget.column),
     );
   }
 
-  void _handleOnPressedFilter() {
+  void _handleOnPressedPopupFilter() {
     stateManager.showFilterPopup(
       context,
       calledColumn: widget.column,
     );
   }
 
-  String? get _title =>
-      widget.column.titleSpan == null ? widget.column.title : null;
-
-  List<InlineSpan> get _children => [
-        if (widget.column.titleSpan != null) widget.column.titleSpan!,
-        if (_isFilteredList)
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: IconButton(
-              icon: Icon(
-                Icons.filter_alt_outlined,
-                color: stateManager.configuration.style.iconColor,
-                size: stateManager.configuration.style.iconSize,
-              ),
-              onPressed: _handleOnPressedFilter,
-              constraints: BoxConstraints(
-                maxHeight:
-                    widget.height + (PlutoGridSettings.rowBorderWidth * 2),
-              ),
-            ),
-          ),
-      ];
+  String? get _title => widget.column.titleSpan == null ? widget.column.title : null;
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
+    final TextStyle textStyle = stateManager.configuration.style.columnTextStyle;
+    final double fontSize = textStyle.fontSize ?? 14;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: AutoSizeText(
+            _title ?? '',
+            style: textStyle,
+            maxFontSize: fontSize,
+            minFontSize: fontSize - 2,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+            maxLines: 2,
+            textAlign: widget.column.titleTextAlign.value,
+          ),
+        ),
+        if (widget.column.trailingWidgetBuilder != null) ...[
+          const SizedBox(width: 12.0),
+          widget.column.trailingWidgetBuilder!.call(context),
+        ],
+      ],
+    );
+
+    /* return Text.rich(
       TextSpan(
         text: _title,
-        children: _children,
+        children: [
+          if (widget.column.titleSpan != null) widget.column.titleSpan!,
+          if (widget.column.trailingWidget != null) ...[
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: widget.column.trailingWidget!,
+            ),
+          ],
+          /* if (_hasPopupFilter) ...[
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: IconButton(
+                icon: Icon(
+                  Icons.filter_alt_outlined,
+                  color: stateManager.configuration.style.iconColor,
+                  size: stateManager.configuration.style.iconSize,
+                ),
+                onPressed: _handleOnPressedPopupFilter,
+                constraints: BoxConstraints(
+                  maxHeight: widget.height + (PlutoGridSettings.rowBorderWidth * 2),
+                ),
+              ),
+            ),
+          ], */
+        ],
       ),
       style: stateManager.configuration.style.columnTextStyle,
       overflow: TextOverflow.ellipsis,
       softWrap: false,
-      maxLines: 1,
+      maxLines: 2,
       textAlign: widget.column.titleTextAlign.value,
-    );
+    ); */
   }
 }

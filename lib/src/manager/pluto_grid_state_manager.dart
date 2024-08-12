@@ -96,10 +96,9 @@ class PlutoGridStateChangeNotifier extends PlutoChangeNotifier
         refColumnGroups = FilteredList<PlutoColumnGroup>(
           initialList: columnGroups,
         ),
-        columnMenuDelegate =
-            columnMenuDelegate ?? const PlutoColumnMenuDelegateDefault(),
-        notifierFilterResolver = notifierFilterResolver ??
-            const PlutoNotifierFilterResolverDefault(),
+        columnMenuDelegate = columnMenuDelegate ?? const PlutoColumnMenuDelegateDefault(),
+        notifierFilterResolver =
+            notifierFilterResolver ?? const PlutoNotifierFilterResolverDefault(),
         gridKey = GlobalKey() {
     setConfiguration(configuration);
     setGridMode(mode ?? PlutoGridMode.normal);
